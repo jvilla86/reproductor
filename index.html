@@ -109,37 +109,46 @@
             };
         }
 
-        async function reproducir(item) {
-            const wrapper = document.getElementById('player-wrapper');
-            wrapper.innerHTML = '';
-
-            if (item.type === 'local') {
-                // Leer el archivo desde IndexedDB
-                const transaction = db.transaction(["songs"], "readonly");
-                const store = transaction.objectStore("songs");
-                const request = store.get(item.url);
-
-                request.onsuccess = () => {
-                    const blob = request.result.data;
-                    const blobUrl = URL.createObjectURL(blob);
-                    wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
-                };
-            } else {
-                // Lógica de reproductores web (YouTube, Spotify...)
-                const url = item.url;
-                if (url.includes('spotify.com')) {
-                    const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/").split('?')[0];
-                    wrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
-                } else if (url.includes('soundcloud.com')) {
-                    wrapper.innerHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
+    async function reproducir(item) {
+        const wrapper = document.getElementById('player-wrapper');
+        wrapper.innerHTML = '';
+    
+        if (item.type === 'local') {
+            const transaction = db.transaction(["songs"], "readonly");
+            const store = transaction.objectStore("songs");
+            const request = store.get(item.url);
+            request.onsuccess = () => {
+                const blob = request.result.data;
+                const blobUrl = URL.createObjectURL(blob);
+                wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
+            };
+        } else {
+            let url = item.url;
+    
+            // --- NUEVA LÓGICA PARA GOOGLE DRIVE ---
+            if (url.includes('drive.google.com')) {
+                const driveId = url.match(/\/d\/([^/]+)/)?.[1] || url.match(/id=([^&]+)/)?.[1];
+                if (driveId) {
+                    const directLink = `https://docs.google.com/uc?export=open&id=${driveId}`;
+                    wrapper.innerHTML = `<audio controls autoplay src="${directLink}"></audio>`;
                 } else {
-                    const idMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-                    if (idMatch) {
-                        wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                    }
+                    alert("ID de Google Drive no reconocido");
+                }
+            } 
+            // --- RESTO DE PLATAFORMAS ---
+            else if (url.includes('spotify.com')) {
+                const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/").split('?')[0];
+                wrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
+            } else if (url.includes('soundcloud.com')) {
+                wrapper.innerHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
+            } else {
+                const idMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+                if (idMatch) {
+                    wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
                 }
             }
         }
+    }
 
         function eliminar(index) {
             const item = playlist[index];
