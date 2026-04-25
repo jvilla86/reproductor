@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Playlist Pro Final</title>
+    <title>Multi-Playlist Pro v10</title>
     <style>
         :root { --primary-color: #1DB954; --bg-color: #121212; --container-bg: #1e1e1e; --item-bg: #282828; --text-main: #ffffff; --text-dim: #b3b3b3; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-    <h1 style="font-size: 1.5rem; margin-bottom: 20px;">🎵 Multi-Playlist Pro v9</h1>
+    <h1 style="font-size: 1.5rem; margin-bottom: 20px;">🎵 Multi-Playlist Pro v10</h1>
 
     <div class="container">
         <div class="controls">
@@ -40,8 +40,7 @@
                 <input type="text" id="nameInput" placeholder="Nombre de la canción...">
                 <input type="text" id="urlInput" placeholder="Link de Drive, Dropbox, YT, Spotify...">
                 <button id="btnAdd" onclick="agregar()">Añadir Link</button>
-                
-                <button class="btn-local" onclick="document.getElementById('fileInput').click()">📁 MP3 Local (Se guarda en navegador)</button>
+                <button class="btn-local" onclick="document.getElementById('fileInput').click()">📁 MP3 Local (Permanente)</button>
                 <input type="file" id="fileInput" style="display: none;" accept="audio/*" onchange="subirArchivoLocal(event)">
             </div>
 
@@ -58,35 +57,24 @@
             <div id="player-wrapper">
                 <div style="text-align: center; color: #888; padding: 20px;">
                     <p>Soporta Links y Archivos</p>
-                    <small>Asegúrate de que los links de Drive sean públicos</small>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let playlist = JSON.parse(localStorage.getItem('multi_playlist_v9') || '[]');
-        
-        // --- BASE DE DATOS LOCAL ---
+        let playlist = JSON.parse(localStorage.getItem('multi_playlist_v10') || '[]');
         let db;
         const request = indexedDB.open("MusicDB", 1);
         request.onupgradeneeded = e => { db = e.target.result; db.createObjectStore("songs", { keyPath: "id" }); };
         request.onsuccess = e => { db = e.target.result; render(); };
 
-        function guardar() {
-            localStorage.setItem('multi_playlist_v9', JSON.stringify(playlist));
-            render();
-        }
+        function guardar() { localStorage.setItem('multi_playlist_v10', JSON.stringify(playlist)); render(); }
 
         function agregar() {
             const url = document.getElementById('urlInput').value.trim();
             const name = document.getElementById('nameInput').value.trim() || "Sin título";
-            if (url) {
-                playlist.push({ name, url, type: 'web', id: Date.now() });
-                document.getElementById('urlInput').value = '';
-                document.getElementById('nameInput').value = '';
-                guardar();
-            }
+            if (url) { playlist.push({ name, url, type: 'web', id: Date.now() }); guardar(); document.getElementById('urlInput').value = ''; }
         }
 
         function subirArchivoLocal(event) {
@@ -95,10 +83,7 @@
             const id = "local-" + Date.now();
             const transaction = db.transaction(["songs"], "readwrite");
             transaction.objectStore("songs").add({ id, data: file });
-            transaction.oncomplete = () => {
-                playlist.push({ name: file.name, url: id, type: 'local', id: Date.now() });
-                guardar();
-            };
+            transaction.oncomplete = () => { playlist.push({ name: file.name, url: id, type: 'local', id: Date.now() }); guardar(); };
         }
 
         async function reproducir(item) {
@@ -110,70 +95,55 @@
                 const store = transaction.objectStore("songs");
                 const req = store.get(item.url);
                 req.onsuccess = () => {
-                    if (req.result) {
-                        const blobUrl = URL.createObjectURL(req.result.data);
-                        wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
-                    } else { alert("Archivo local no encontrado en este dispositivo."); }
+                    const blobUrl = URL.createObjectURL(req.result.data);
+                    wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
                 };
             } else {
                 let url = item.url;
+                // DROPBOX FIX
+                if (url.includes('dropbox.com')) {
+                    const directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '') + (url.includes('?') ? '&raw=1' : '?raw=1');
+                    wrapper.innerHTML = `<audio controls autoplay><source src="${directUrl}" type="audio/mpeg">Tu navegador no soporta Dropbox.</audio>`;
+                }
                 // DRIVE
-                if (url.includes('drive.google.com')) {
+                else if (url.includes('drive.google.com')) {
                     const driveId = url.match(/\/d\/([^/]+)/)?.[1] || url.match(/id=([^&]+)/)?.[1];
                     const directUrl = `https://docs.google.com/uc?export=open&id=${driveId}`;
-                    wrapper.innerHTML = `<audio controls autoplay src="${directUrl}" onerror="alert('Error: Asegúrate de que el link de Drive es público')"></audio>`;
-                } 
-                // DROPBOX
-                else if (url.includes('dropbox.com')) {
-                    const dropboxUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').split('?')[0] + '?raw=1';
-                    wrapper.innerHTML = `<audio controls autoplay src="${dropboxUrl}"></audio>`;
+                    wrapper.innerHTML = `<audio controls autoplay src="${directUrl}"></audio>`;
                 }
-                // SPOTIFY
+                // SPOTIFY / YT / SC
                 else if (url.includes('spotify.com')) {
-                    const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/").split('?')[0];
+                    const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/");
                     wrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
                 }
-                // SOUNDCLOUD
-                else if (url.includes('soundcloud.com')) {
-                    wrapper.innerHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true"></iframe>`;
-                }
-                // YOUTUBE
                 else {
                     const idMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-                    if (idMatch) wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                    if (idMatch) wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allowfullscreen></iframe>`;
                 }
             }
         }
 
         function eliminar(index) {
-            if (confirm("¿Eliminar canción?")) {
-                const item = playlist[index];
-                if (item.type === 'local') {
+            if (confirm("¿Eliminar?")) {
+                if (playlist[index].type === 'local') {
                     const transaction = db.transaction(["songs"], "readwrite");
-                    transaction.objectStore("songs").delete(item.url);
+                    transaction.objectStore("songs").delete(playlist[index].url);
                 }
-                playlist.splice(index, 1);
-                guardar();
+                playlist.splice(index, 1); guardar();
             }
         }
 
         function mover(index, dir) {
             const item = playlist.splice(index, 1)[0];
-            playlist.splice(index + dir, 0, item);
-            guardar();
+            playlist.splice(index + dir, 0, item); guardar();
         }
 
-        // --- IMPORTAR / EXPORTAR MEJORADO ---
         function exportarLista() {
-            if (playlist.length === 0) return alert("La lista está vacía");
             const dataStr = JSON.stringify(playlist, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
-            link.download = 'mi_playlist_pro.json';
-            link.click();
-            setTimeout(() => URL.revokeObjectURL(url), 100);
+            link.href = url; link.download = 'playlist_v10.json'; link.click();
         }
 
         function importarLista(event) {
@@ -182,40 +152,21 @@
             const reader = new FileReader();
             reader.onload = e => {
                 try {
-                    let contenido = e.target.result;
-                    // Limpieza extrema para móviles y PC
-                    const inicio = contenido.indexOf('[');
-                    const fin = contenido.lastIndexOf(']');
-                    if (inicio === -1 || fin === -1) throw new Error();
-                    
-                    const nuevaLista = JSON.parse(contenido.substring(inicio, fin + 1));
-                    if (confirm("¿Sobrescribir lista actual?")) {
-                        playlist = nuevaLista;
-                        guardar();
-                    }
-                } catch (err) {
-                    alert("Error: El archivo no es un JSON de playlist válido.");
-                }
+                    const json = e.target.result.substring(e.target.result.indexOf('['), e.target.result.lastIndexOf(']') + 1);
+                    playlist = JSON.parse(json); guardar();
+                } catch (err) { alert("Error al importar"); }
             };
             reader.readAsText(file);
-            event.target.value = '';
         }
 
         function render() {
             const div = document.getElementById('lista');
             div.innerHTML = '';
             playlist.forEach((item, i) => {
-                let icono = item.type === 'local' ? "📁" : 
-                           (item.url.includes("drive") ? "☁️" : 
-                           (item.url.includes("spotify") ? "🟢" : 
-                           (item.url.includes("soundcloud") ? "🟠" : "🔴")));
-                
+                let icono = item.type === 'local' ? "📁" : (item.url.includes("dropbox") ? "💙" : (item.url.includes("drive") ? "☁️" : "🔴"));
                 div.innerHTML += `
                     <div class="item">
-                        <div class="info">
-                            <strong>${icono} ${item.name}</strong>
-                            <small>${item.type === 'local' ? 'Archivo Local' : 'Enlace Web'}</small>
-                        </div>
+                        <div class="info"><strong>${icono} ${item.name}</strong><small>${item.type==='local'?'Local':'Nube'}</small></div>
                         <div style="display:flex; gap:5px;">
                             <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
                             <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
