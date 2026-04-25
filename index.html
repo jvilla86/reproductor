@@ -120,18 +120,26 @@
             } else {
                 let url = item.url;
 
-                // --- LÓGICA GOOGLE DRIVE MEJORADA ---
+              // --- LÓGICA GOOGLE DRIVE DEFINITIVA ---
                 if (url.includes('drive.google.com')) {
-                    // Extrae el ID del archivo de varios formatos de URL posibles
                     const driveId = url.match(/\/d\/([^/]+)/)?.[1] || url.match(/id=([^&]+)/)?.[1];
                     if (driveId) {
-                        // URL de "Stream" directo para reproductores HTML5
-                        const directUrl = `https://docs.google.com/uc?export=open&id=${driveId}`;
-                        wrapper.innerHTML = `<audio controls autoplay src="${directUrl}"></audio>`;
-                    } else {
-                        alert("No se pudo detectar el ID del archivo de Drive.");
+                        // Probamos con el endpoint de previsualización que es más permisivo
+                        const directUrl = `https://drive.google.com/uc?export=download&id=${driveId}`;
+                        wrapper.innerHTML = `
+                            <div style="padding: 20px; text-align: center;">
+                                <p style="margin-bottom:15px; font-size:12px; color:#aaa;">Reproduciendo desde Google Cloud</p>
+                                <audio controls autoplay style="width:100%;">
+                                    <source src="${directUrl}" type="audio/mpeg">
+                                    Tu navegador no soporta streaming directo de Drive.
+                                </audio>
+                                <br><br>
+                                <a href="${url}" target="_blank" style="color:#1DB954; font-size:12px; text-decoration:none;">
+                                    Abrir en pestaña nueva si no carga
+                                </a>
+                            </div>`;
                     }
-                } 
+                }
                 // --- SPOTIFY ---
                 else if (url.includes('spotify.com')) {
                     const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/").split('?')[0];
