@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Multi-Playlist Pro</title>
+    <title>Multi-Playlist Pro Mobile-Ready</title>
     <style>
         :root {
             --primary-color: #1DB954;
@@ -15,13 +15,13 @@
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
             background: var(--bg-color); 
             color: var(--text-main); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px; 
+            padding: 15px; 
             margin: 0;
         }
 
@@ -32,22 +32,22 @@
             padding: 20px; 
             border-radius: 12px; 
             flex: 1; 
-            min-width: 320px; 
+            min-width: 300px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .player-section { flex: 1; min-width: 320px; position: sticky; top: 20px; height: fit-content; }
+        .player-section { flex: 1; min-width: 300px; position: sticky; top: 15px; height: fit-content; }
         
         .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         
         input[type="text"] { 
             padding: 12px; 
             border: 2px solid transparent; 
-            border-radius: 6px; 
+            border-radius: 8px; 
             background: #333; 
             color: white; 
             outline: none;
-            transition: 0.2s;
+            font-size: 16px; /* Evita zoom automático en iPhone */
         }
 
         input[type="text"]:focus { border-color: var(--primary-color); }
@@ -56,7 +56,7 @@
             padding: 12px; 
             cursor: pointer; 
             border: none; 
-            border-radius: 6px; 
+            border-radius: 8px; 
             font-weight: bold; 
             transition: 0.2s;
             display: flex;
@@ -65,91 +65,84 @@
             gap: 8px;
         }
 
-        #btnAdd { background: var(--primary-color); color: white; }
-        #btnAdd:hover { background: #1ed760; transform: scale(1.02); }
+        #btnAdd { background: var(--primary-color); color: white; width: 100%; }
 
-        .share-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-secondary { background: #404040; color: white; flex: 1; font-size: 12px; }
-        .btn-secondary:hover { background: #505050; }
+        .share-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-secondary { background: #404040; color: white; flex: 1; font-size: 11px; text-transform: uppercase; }
 
-        /* Lista de items */
         .item { 
             background: var(--item-bg); 
             margin-top: 10px; 
             padding: 12px; 
             display: flex; 
             align-items: center; 
-            border-radius: 8px; 
-            gap: 12px; 
+            border-radius: 10px; 
+            gap: 10px; 
             border: 1px solid #333; 
         }
 
         .info { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .info strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .info small { font-size: 11px; color: var(--text-dim); }
+        .info small { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
         .btn-order { 
             background: #333; 
             color: #fff; 
-            font-size: 14px; 
-            width: 32px; 
-            height: 32px; 
+            font-size: 12px; 
+            width: 35px; 
+            height: 35px; 
             border-radius: 50%; 
-            padding: 0;
+            flex-shrink: 0;
         }
-        .btn-order:disabled { opacity: 0.2; cursor: not-allowed; }
+        .btn-order:disabled { opacity: 0.2; }
         
-        .btn-play { background: var(--primary-color); color: white; padding: 8px 16px; border-radius: 20px; }
-        .btn-del { background: transparent; color: #ff4444; font-size: 18px; padding: 5px; }
+        .btn-play { background: var(--primary-color); color: white; padding: 8px 14px; border-radius: 20px; flex-shrink: 0; }
+        .btn-del { background: transparent; color: #ff4444; font-size: 20px; padding: 0 5px; }
 
-        iframe { width: 100%; border-radius: 12px; background: #000; min-height: 350px; border: none; }
+        iframe { width: 100%; border-radius: 12px; background: #000; min-height: 300px; border: none; }
     </style>
 </head>
 <body>
 
-    <h1>🎵 Multi-Playlist Pro</h1>
+    <h1 style="font-size: 1.5rem; margin-bottom: 20px;">🎵 Multi-Playlist Pro</h1>
 
     <div class="container">
         <div class="controls">
             <div class="input-group">
                 <input type="text" id="nameInput" placeholder="Nombre de la canción...">
-                <input type="text" id="urlInput" placeholder="Pega link de YouTube, Spotify o SoundCloud...">
-                <button id="btnAdd" onclick="agregar()">+ Añadir a la lista (Enter)</button>
+                <input type="text" id="urlInput" placeholder="URL de YouTube, Spotify o SoundCloud...">
+                <button id="btnAdd" onclick="agregar()">Añadir a la lista</button>
             </div>
 
             <div class="share-group">
-                <button class="btn-secondary" onclick="exportarLista()">📤 Exportar JSON</button>
-                <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📥 Importar JSON</button>
+                <button class="btn-secondary" onclick="exportarLista()">📤 Exportar</button>
+                <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📥 Importar</button>
                 <input type="file" id="importInput" style="display: none;" onchange="importarLista(event)" accept=".json">
             </div>
 
-            <div id="lista" style="margin-top: 20px;"></div>
+            <div id="lista" style="margin-top: 15px;"></div>
         </div>
 
         <div class="player-section">
             <div id="contenedorPlayer">
-                <div style="background:#282828; height:350px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b3b3b3; border-radius:12px; border: 2px dashed #444; text-align: center; padding: 20px;">
-                    <p>Selecciona un tema para reproducir</p>
-                    <small>YouTube • Spotify • SoundCloud</small>
+                <div style="background:#282828; height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b3b3b3; border-radius:12px; border: 2px dashed #444; text-align: center; padding: 20px;">
+                    <p>Listo para sonar</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ESTADO INICIAL ---
-        let playlist = JSON.parse(localStorage.getItem('multi_playlist_v4') || '[]');
+        let playlist = JSON.parse(localStorage.getItem('multi_playlist_v5') || '[]');
 
         function guardar() {
-            localStorage.setItem('multi_playlist_v4', JSON.stringify(playlist));
+            localStorage.setItem('multi_playlist_v5', JSON.stringify(playlist));
             render();
         }
 
-        // --- FUNCIONES PRINCIPALES ---
         function agregar() {
             const url = document.getElementById('urlInput').value.trim();
             const name = document.getElementById('nameInput').value.trim() || "Sin título";
-            
             if (url) {
                 playlist.push({ name: name, url: url, id: Date.now() });
                 document.getElementById('urlInput').value = '';
@@ -172,90 +165,85 @@
             guardar();
         }
 
-        // --- REPRODUCTOR INTELIGENTE ---
         function reproducir(url) {
             const contenedor = document.getElementById('contenedorPlayer');
-            
-            // Lógica Spotify
             if (url.includes('spotify.com')) {
                 const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/").split('?')[0];
                 contenedor.innerHTML = `<iframe src="${embedUrl}" width="100%" height="350" allow="encrypted-media"></iframe>`;
-            } 
-            // Lógica SoundCloud
-            else if (url.includes('soundcloud.com')) {
-                contenedor.innerHTML = `<iframe width="100%" height="350" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
-            } 
-            // Lógica YouTube
-            else {
+            } else if (url.includes('soundcloud.com')) {
+                contenedor.innerHTML = `<iframe width="100%" height="350" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
+            } else {
                 const idMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-                const id = idMatch ? idMatch[1] : null;
-                if (id) {
-                    contenedor.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&origin=${window.location.origin}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                } else {
-                    alert("URL de YouTube no válida");
+                if (idMatch) {
+                    contenedor.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
                 }
             }
         }
 
-        // --- EXPORTAR / IMPORTAR ---
+        // --- EXPORTAR / IMPORTAR (VERSIÓN SMARTPHONE) ---
         function exportarLista() {
-            if (playlist.length === 0) return alert("La lista está vacía");
+            if (playlist.length === 0) return alert("Lista vacía");
             const dataStr = JSON.stringify(playlist, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'mi_playlist_pro.json';
+            link.download = 'mi_playlist.json';
             link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
         function importarLista(event) {
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const nuevaLista = JSON.parse(e.target.result);
-                    if (confirm("¿Sobrescribir tu lista actual con la importada?")) {
-                        playlist = nuevaLista;
-                        guardar();
+                    let contenido = e.target.result.trim();
+                    // Quitar BOM si existe (común en archivos móviles)
+                    if (contenido.charCodeAt(0) === 0xFEFF) contenido = contenido.substr(1);
+                    
+                    const nuevaLista = JSON.parse(contenido);
+                    if (Array.isArray(nuevaLista)) {
+                        if (confirm("¿Sobrescribir lista actual?")) {
+                            playlist = nuevaLista;
+                            guardar();
+                        }
                     }
-                } catch (err) { alert("Error: El archivo no es un JSON válido"); }
+                } catch (err) {
+                    alert("Error: El archivo no es válido. Asegúrate de que sea el .json original.");
+                }
             };
             reader.readAsText(file);
+            event.target.value = ''; // Reset para permitir cargar el mismo archivo
         }
 
-        // --- EVENTOS DE TECLADO ---
+        // --- ENTER KEY ---
         [document.getElementById('nameInput'), document.getElementById('urlInput')].forEach(input => {
             input.addEventListener("keypress", (e) => { if (e.key === "Enter") agregar(); });
         });
 
-        // --- RENDERIZADO ---
         function render() {
             const div = document.getElementById('lista');
             div.innerHTML = '';
-            
             playlist.forEach((item, i) => {
-                let icono = "🎵";
-                if(item.url.includes("spotify")) icono = "🟢";
-                if(item.url.includes("soundcloud")) icono = "🟠";
-                if(item.url.includes("youtube") || item.url.includes("youtu.be")) icono = "🔴";
-
+                let icono = item.url.includes("spotify") ? "🟢" : (item.url.includes("soundcloud") ? "🟠" : "🔴");
                 div.innerHTML += `
                     <div class="item">
                         <div class="info">
                             <strong>${icono} ${item.name}</strong>
-                            <small>${item.url.substring(0, 35)}...</small>
+                            <small>${item.url.substring(0, 30)}...</small>
                         </div>
-                        <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
-                        <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
-                        <button class="btn-play" onclick="reproducir('${item.url}')">▶</button>
-                        <button class="btn-del" onclick="eliminar(${i})">✖</button>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
+                            <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
+                            <button class="btn-play" onclick="reproducir('${item.url}')">▶</button>
+                            <button class="btn-del" onclick="eliminar(${i})">✖</button>
+                        </div>
                     </div>`;
             });
         }
-
-        // Carga inicial
         render();
     </script>
 </body>
