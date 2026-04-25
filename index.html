@@ -193,41 +193,44 @@
             setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
-function importarLista(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        try {
-            // Leemos el archivo como un chorro de datos puros (Uint8Array)
-            const decoder = new TextDecoder("utf-8");
-            let contenido = decoder.decode(e.target.result).trim();
+        function importarLista(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+        
+            const reader = new FileReader();
             
-            // Limpieza extrema de caracteres invisibles al inicio y final
-            contenido = contenido.replace(/^\uFEFF/, ''); 
-            
-            const nuevaLista = JSON.parse(contenido);
-
-            if (Array.isArray(nuevaLista)) {
-                if (confirm("¿Sobrescribir lista actual?")) {
-                    playlist = nuevaLista;
-                    guardar();
-                    alert("✅ Lista cargada correctamente");
+            reader.onload = function(e) {
+                try {
+                    const decoder = new TextDecoder("utf-8");
+                    let contenido = decoder.decode(e.target.result);
+                    
+                    // 1. Limpieza de "BOM" (carácter invisible de archivos Windows)
+                    contenido = contenido.replace(/^\uFEFF/, '');
+                    
+                    // 2. Limpieza de saltos de línea de Windows (\r\n) a formato universal
+                    contenido = contenido.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                    
+                    // 3. Quitar cualquier espacio en blanco al inicio o final
+                    contenido = contenido.trim();
+                    
+                    const nuevaLista = JSON.parse(contenido);
+        
+                    if (Array.isArray(nuevaLista)) {
+                        if (confirm("¿Sobrescribir lista actual con los datos del PC?")) {
+                            playlist = nuevaLista;
+                            guardar();
+                            alert("✅ ¡Lista del PC cargada con éxito!");
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                    alert("❌ El archivo del PC tiene un formato incompatible o está dañado.");
                 }
-            }
-        } catch (err) {
-            console.error("Detalle del error:", err);
-            alert("❌ Error de formato. Asegúrate de que el archivo fue exportado desde esta misma web.");
+            };
+        
+            reader.readAsArrayBuffer(file);
+            event.target.value = ''; 
         }
-    };
-
-    // Usamos readAsArrayBuffer en lugar de readAsText para máxima compatibilidad móvil
-    reader.readAsArrayBuffer(file);
-    event.target.value = ''; 
-}
-
         // --- ENTER KEY ---
         [document.getElementById('nameInput'), document.getElementById('urlInput')].forEach(input => {
             input.addEventListener("keypress", (e) => { if (e.key === "Enter") agregar(); });
