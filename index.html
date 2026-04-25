@@ -86,39 +86,50 @@
             transaction.oncomplete = () => { playlist.push({ name: file.name, url: id, type: 'local', id: Date.now() }); guardar(); };
         }
 
-        async function reproducir(item) {
+       async function reproducir(item) {
             const wrapper = document.getElementById('player-wrapper');
             wrapper.innerHTML = '<p style="color:white">Cargando...</p>';
-
+        
             if (item.type === 'local') {
                 const transaction = db.transaction(["songs"], "readonly");
                 const store = transaction.objectStore("songs");
                 const req = store.get(item.url);
                 req.onsuccess = () => {
-                    const blobUrl = URL.createObjectURL(req.result.data);
-                    wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
+                    if (req.result) {
+                        const blobUrl = URL.createObjectURL(req.result.data);
+                        // Añadimos autoplay directo al objeto audio
+                        wrapper.innerHTML = `<audio controls autoplay src="${blobUrl}"></audio>`;
+                    }
                 };
             } else {
                 let url = item.url;
-                // DROPBOX FIX
+                
+                // DROPBOX: Forzamos el streaming con autoplay
                 if (url.includes('dropbox.com')) {
                     const directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '') + (url.includes('?') ? '&raw=1' : '?raw=1');
-                    wrapper.innerHTML = `<audio controls autoplay><source src="${directUrl}" type="audio/mpeg">Tu navegador no soporta Dropbox.</audio>`;
+                    wrapper.innerHTML = `<audio controls autoplay src="${directUrl}" type="audio/mpeg"></audio>`;
                 }
-                // DRIVE
+                // DRIVE: Usamos el endpoint de preview que suele autoejecutarse mejor
                 else if (url.includes('drive.google.com')) {
                     const driveId = url.match(/\/d\/([^/]+)/)?.[1] || url.match(/id=([^&]+)/)?.[1];
                     const directUrl = `https://docs.google.com/uc?export=open&id=${driveId}`;
                     wrapper.innerHTML = `<audio controls autoplay src="${directUrl}"></audio>`;
                 }
-                // SPOTIFY / YT / SC
+                // SPOTIFY: El embed de Spotify NO permite autoplay por política de su empresa (requiere clic del usuario siempre)
                 else if (url.includes('spotify.com')) {
                     const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/");
-                    wrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
+                    wrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media; autoplay"></iframe>`;
                 }
+                // SOUNDCLOUD: Añadimos auto_play=true
+                else if (url.includes('soundcloud.com')) {
+                    wrapper.innerHTML = `<iframe src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true" allow="autoplay"></iframe>`;
+                }
+                // YOUTUBE: Añadimos autoplay=1 y mute=0 para intentar que suene
                 else {
                     const idMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-                    if (idMatch) wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1" allowfullscreen></iframe>`;
+                    if (idMatch) {
+                        wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${idMatch[1]}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                    }
                 }
             }
         }
