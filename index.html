@@ -9,25 +9,19 @@
         .container { display: flex; gap: 20px; max-width: 1000px; width: 100%; flex-wrap: wrap; }
         .controls { background: #1e1e1e; padding: 20px; border-radius: 12px; flex: 1; min-width: 320px; }
         .player-section { flex: 1; min-width: 320px; position: sticky; top: 20px; }
-        
-        /* Inputs mejorados */
         .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input { padding: 12px; border: none; border-radius: 6px; background: #333; color: white; }
-        button#btnAdd { padding: 12px; cursor: pointer; border: none; border-radius: 6px; background: #1DB954; color: white; font-weight: bold; }
-
-        /* Lista de items */
+        input { padding: 12px; border: none; border-radius: 6px; background: #333; color: white; border: 2px solid transparent; outline: none; }
+        input:focus { border-color: #1DB954; } /* Resalte verde al escribir */
+        button#btnAdd { padding: 12px; cursor: pointer; border: none; border-radius: 6px; background: #1DB954; color: white; font-weight: bold; transition: 0.2s; }
+        button#btnAdd:hover { background: #1ed760; transform: scale(1.02); }
         .item { background: #282828; margin-top: 10px; padding: 12px; display: flex; align-items: center; border-radius: 8px; gap: 10px; border: 1px solid #333; }
         .info { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .info strong { font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .info small { font-size: 11px; color: #888; }
-
-        /* Botones de orden (Nuevos ▲ ▼) */
         .btn-order { background: #333; color: #fff; font-size: 14px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: none; cursor: pointer; }
         .btn-order:disabled { opacity: 0.2; cursor: not-allowed; }
-        
         .btn-play { background: #1DB954; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         .btn-del { background: transparent; color: #ff4444; border: none; cursor: pointer; font-size: 18px; }
-
         iframe { width: 100%; border-radius: 12px; background: #000; min-height: 350px; border: none; }
     </style>
 </head>
@@ -38,9 +32,9 @@
     <div class="container">
         <div class="controls">
             <div class="input-group">
-                <input type="text" id="nameInput" placeholder="Nombre de la canción (ej: Mi canción favorita)">
+                <input type="text" id="nameInput" placeholder="Nombre de la canción...">
                 <input type="text" id="urlInput" placeholder="Pega link de YouTube, Spotify o SoundCloud...">
-                <button id="btnAdd" onclick="agregar()">+ Añadir a la lista</button>
+                <button id="btnAdd" onclick="agregar()">+ Añadir (Enter)</button>
             </div>
             <div id="lista"></div>
         </div>
@@ -48,7 +42,7 @@
         <div class="player-section">
             <div id="contenedorPlayer">
                 <div style="background:#282828; height:350px; display:flex; align-items:center; justify-content:center; color:#b3b3b3; border-radius:12px; border: 2px dashed #444;">
-                    Selecciona un tema para reproducir
+                    Listo para reproducir
                 </div>
             </div>
         </div>
@@ -65,42 +59,37 @@
         function agregar() {
             const url = document.getElementById('urlInput').value.trim();
             const name = document.getElementById('nameInput').value.trim() || "Sin título";
-            
             if (url) {
                 playlist.push({ name: name, url: url });
                 document.getElementById('urlInput').value = '';
                 document.getElementById('nameInput').value = '';
                 guardar();
+                document.getElementById('nameInput').focus(); // Vuelve el foco al primer input
             }
         }
 
-        function eliminar(index) {
-            playlist.splice(index, 1);
-            guardar();
-        }
+        // --- DETECTAR ENTER ---
+        [document.getElementById('nameInput'), document.getElementById('urlInput')].forEach(input => {
+            input.addEventListener("keypress", (e) => { if (e.key === "Enter") agregar(); });
+        });
 
-        function mover(index, dir) {
-            const item = playlist.splice(index, 1)[0];
-            playlist.splice(index + dir, 0, item);
-            guardar();
+        function eliminar(index) { playlist.splice(index, 1); guardar(); }
+        function mover(index, dir) { 
+            const item = playlist.splice(index, 1)[0]; 
+            playlist.splice(index + dir, 0, item); 
+            guardar(); 
         }
 
         function reproducir(url) {
             const contenedor = document.getElementById('contenedorPlayer');
-            
             if (url.includes('spotify.com')) {
-                const embedUrl = url.replace("open.spotify.com/", "open.spotify.com/embed/");
+                const embedUrl = url.replace("/track/", "/embed/track/").replace("/playlist/", "/embed/playlist/");
                 contenedor.innerHTML = `<iframe src="${embedUrl}" width="100%" height="350" allow="encrypted-media"></iframe>`;
-            } 
-            else if (url.includes('soundcloud.com')) {
-                contenedor.innerHTML = `<iframe width="100%" height="350" allow="autoplay" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
-            } 
-            else {
-                const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-                const match = url.match(regex);
-                if (match) {
-                    contenedor.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                }
+            } else if (url.includes('soundcloud.com')) {
+                contenedor.innerHTML = `<iframe width="100%" height="350" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&visual=true"></iframe>`;
+            } else {
+                const id = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)?.[1];
+                if (id) contenedor.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
             }
         }
 
@@ -108,17 +97,10 @@
             const div = document.getElementById('lista');
             div.innerHTML = '';
             playlist.forEach((item, i) => {
-                let icono = "🎵";
-                if(item.url.includes("spotify")) icono = "🟢";
-                if(item.url.includes("soundcloud")) icono = "🟠";
-                if(item.url.includes("youtube") || item.url.includes("youtu.be")) icono = "🔴";
-
+                let icono = item.url.includes("spotify") ? "🟢" : (item.url.includes("soundcloud") ? "🟠" : "🔴");
                 div.innerHTML += `
                     <div class="item">
-                        <div class="info">
-                            <strong>${icono} ${item.name}</strong>
-                            <small>${item.url.substring(0, 40)}...</small>
-                        </div>
+                        <div class="info"><strong>${icono} ${item.name}</strong><small>${item.url.substring(0, 35)}...</small></div>
                         <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
                         <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
                         <button class="btn-play" onclick="reproducir('${item.url}')">▶</button>
