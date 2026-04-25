@@ -17,6 +17,38 @@
         .btn-play { background: #1DB954; }
         .btn-order { background: #404040; color: #fff; }
         iframe { width: 100%; border-radius: 12px; background: #000; min-height: 350px; }
+
+        /* Botones de orden mejorados */
+.btn-order {
+    background: #333;
+    color: #fff;
+    font-size: 18px; /* Flechas más grandes */
+    font-weight: bold;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Botones circulares */
+    transition: background 0.2s;
+}
+
+.btn-order:hover:not(:disabled) {
+    background: #555;
+}
+
+.btn-order:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Ajuste del contenedor para que no se amontonen */
+.item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 12px;
+}
     </style>
 </head>
 <body>
@@ -109,8 +141,10 @@
                 div.innerHTML += `
                     <div class="item">
                         <span>${icono} ${url}</span>
-                        <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>↑</button>
-                        <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>↓</button>
+                       <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>
+                        ▲ </button>
+                        <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>
+                        ▼ </button>
                         <button class="btn-play" onclick="reproducir('${url}')">▶</button>
                         <button class="btn-del" onclick="eliminar(${i})">✖</button>
                     </div>`;
