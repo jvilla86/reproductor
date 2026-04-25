@@ -201,34 +201,38 @@
             
             reader.onload = function(e) {
                 try {
-                    const decoder = new TextDecoder("utf-8");
-                    let contenido = decoder.decode(e.target.result);
+                    let contenido = e.target.result;
+        
+                    // 1. LIMPIEZA EXTREMA: Solo nos quedamos con lo que hay entre [ y ]
+                    // Esto elimina firmas de WhatsApp, errores de Windows, o textos extraños
+                    const inicio = contenido.indexOf('[');
+                    const fin = contenido.lastIndexOf(']');
                     
-                    // 1. Limpieza de "BOM" (carácter invisible de archivos Windows)
-                    contenido = contenido.replace(/^\uFEFF/, '');
+                    if (inicio === -1 || fin === -1) {
+                        throw new Error("No se encontró una lista válida");
+                    }
                     
-                    // 2. Limpieza de saltos de línea de Windows (\r\n) a formato universal
-                    contenido = contenido.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                    
-                    // 3. Quitar cualquier espacio en blanco al inicio o final
-                    contenido = contenido.trim();
-                    
+                    contenido = contenido.substring(inicio, fin + 1);
+        
+                    // 2. PARSEO
                     const nuevaLista = JSON.parse(contenido);
         
                     if (Array.isArray(nuevaLista)) {
-                        if (confirm("¿Sobrescribir lista actual con los datos del PC?")) {
+                        if (confirm("✅ Lista detectada. ¿Cargar ahora?")) {
                             playlist = nuevaLista;
                             guardar();
-                            alert("✅ ¡Lista del PC cargada con éxito!");
+                            alert("¡Éxito! Lista sincronizada.");
                         }
                     }
                 } catch (err) {
-                    console.error("Error al procesar:", err);
-                    alert("❌ El archivo del PC tiene un formato incompatible o está dañado.");
+                    console.error("Error crítico:", err);
+                    // Si falla, mostramos un aviso más útil
+                    alert("❌ Error al leer el archivo. \n\nTip: Intenta enviarlo por Gmail o Telegram en lugar de WhatsApp, ya que WhatsApp a veces modifica los archivos.");
                 }
             };
         
-            reader.readAsArrayBuffer(file);
+            // Volvemos a readAsText pero con la limpieza manual de substrings
+            reader.readAsText(file);
             event.target.value = ''; 
         }
         // --- ENTER KEY ---
