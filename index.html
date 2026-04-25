@@ -193,31 +193,40 @@
             setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
-        function importarLista(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+function importarLista(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let contenido = e.target.result.trim();
-                    // Quitar BOM si existe (común en archivos móviles)
-                    if (contenido.charCodeAt(0) === 0xFEFF) contenido = contenido.substr(1);
-                    
-                    const nuevaLista = JSON.parse(contenido);
-                    if (Array.isArray(nuevaLista)) {
-                        if (confirm("¿Sobrescribir lista actual?")) {
-                            playlist = nuevaLista;
-                            guardar();
-                        }
-                    }
-                } catch (err) {
-                    alert("Error: El archivo no es válido. Asegúrate de que sea el .json original.");
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            // Leemos el archivo como un chorro de datos puros (Uint8Array)
+            const decoder = new TextDecoder("utf-8");
+            let contenido = decoder.decode(e.target.result).trim();
+            
+            // Limpieza extrema de caracteres invisibles al inicio y final
+            contenido = contenido.replace(/^\uFEFF/, ''); 
+            
+            const nuevaLista = JSON.parse(contenido);
+
+            if (Array.isArray(nuevaLista)) {
+                if (confirm("¿Sobrescribir lista actual?")) {
+                    playlist = nuevaLista;
+                    guardar();
+                    alert("✅ Lista cargada correctamente");
                 }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; // Reset para permitir cargar el mismo archivo
+            }
+        } catch (err) {
+            console.error("Detalle del error:", err);
+            alert("❌ Error de formato. Asegúrate de que el archivo fue exportado desde esta misma web.");
         }
+    };
+
+    // Usamos readAsArrayBuffer en lugar de readAsText para máxima compatibilidad móvil
+    reader.readAsArrayBuffer(file);
+    event.target.value = ''; 
+}
 
         // --- ENTER KEY ---
         [document.getElementById('nameInput'), document.getElementById('urlInput')].forEach(input => {
