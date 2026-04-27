@@ -213,13 +213,13 @@
         }
 
         function eliminar(index) {
-            if (confirm("¿Eliminar?")) {
+            //if (confirm("¿Eliminar?")) {
                 if (playlist[index].type === 'local') {
                     const transaction = db.transaction(["songs"], "readwrite");
                     transaction.objectStore("songs").delete(playlist[index].url);
                 }
                 playlist.splice(index, 1); guardar();
-            }
+            //}
         }
 
         function mover(index, dir) {
