@@ -30,36 +30,78 @@
         audio { width: 90%; }
         iframe { width: 100%; height: 350px; border: none; }
 
-        .help-box {
-            background: rgba(29, 185, 84, 0.1);
-            border-left: 4px solid var(--primary-color);
-            padding: 15px;
+       details.help-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            padding: 10px;
             margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 13px;
-            line-height: 1.5;
-            color: var(--text-dim);
-            max-width: 1000px;
+            border-radius: 8px;
             width: 100%;
+            max-width: 1000px;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
-        .help-box strong { color: var(--primary-color); }
-        .help-box ul { margin: 5px 0; padding-left: 20px; }
+        
+        details.help-box[open] {
+            background: rgba(29, 185, 84, 0.1);
+            border-color: var(--primary-color);
+        }
+        
+        summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
+            outline: none;
+        }
+        
+        /* Símbolo de información redondo */
+        summary::before {
+            content: "i";
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            line-height: 22px;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            font-size: 14px;
+        }
+        
+        .help-content {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+        
+        .help-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
     </style>
 </head>
 <body>
 
     <h1 style="font-size: 1.5rem; margin-bottom: 20px;">🎵 Multi-Playlist Pro</h1>
-    <div class="help-box">
-        <strong>💡 Guía rápida de uso:</strong>
-        <ul>
-            <li><strong>Títulos:</strong> Escribe el nombre manualmente en el primer campo antes de añadir el enlace.</li>
-            <li><strong>YouTube/Spotify/SoundCloud:</strong> Pega el enlace compartido estándar.</li>
-            <li><strong>Google Drive/Dropbox:</strong> Asegúrate de que el archivo sea <u>Público</u> ("Cualquier persona con el enlace").</li>
-            <li><strong>Archivos Locales:</strong> Usa el botón 📁 para subir MP3 desde tu dispositivo (se guardan en este navegador).</li>
-        </ul>
-        <em>* Recuerda exportar tu JSON para guardar una copia de seguridad de tu lista.</em>
-    </div>
+    <details class="help-box">
+        <summary>Guía de uso e información</summary>
+        <div class="help-content">
+            <p>Esta aplicación te permite gestionar una lista de reproducción unificada desde distintas fuentes.</p>
+            <ul>
+                <li><strong>Títulos:</strong> Debes escribir el nombre de la canción manualmente en el campo "Nombre" antes de añadir el enlace.</li>
+                <li><strong>YouTube / Spotify / SoundCloud:</strong> Pega el enlace de compartir directamente.</li>
+                <li><strong>Google Drive / Dropbox:</strong> El archivo debe estar configurado como <u>Público</u> ("Cualquier persona con el enlace").</li>
+                <li><strong>Archivos Locales:</strong> Usa el botón 📁 para cargar MP3. Estos se guardan en la base de datos interna de tu navegador (IndexedDB).</li>
+            </ul>
+            <p style="font-size: 11px; border-top: 1px solid #444; pt: 10px;">
+                <em>* Nota: Para pasar la lista a otro dispositivo, usa el botón "Exportar JSON" y cárgalo en el nuevo terminal. Los archivos locales (📁) no se transfieren por JSON.</em>
+            </p>
+        </div>
+    </details>
     <div class="container">
         <div class="controls">
             <div class="input-group">
