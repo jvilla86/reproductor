@@ -177,7 +177,7 @@
                 let icono = item.type === 'local' ? "📁" : (item.url.includes("dropbox") ? "💙" : (item.url.includes("drive") ? "☁️" : "🔴"));
                 div.innerHTML += `
                     <div class="item">
-                        <div class="info"><strong>${icono} ${item.name}</strong><small>${item.type==='local'?'Local':'Nube'}</small></div>
+                        <div class="info"><strong>${icono} ${item.name}</strong><!--<small>${item.type==='local'?'Local':'Nube'}</small>--></div>
                         <div style="display:flex; gap:5px;">
                             <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
                             <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
