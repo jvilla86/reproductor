@@ -24,6 +24,7 @@
         .info small { font-size: 11px; color: var(--text-dim); }
         .btn-order { background: #333; color: #fff; font-size: 12px; width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; }
         .btn-play { background: var(--primary-color); color: white; padding: 8px 14px; border-radius: 20px; flex-shrink: 0; }
+        .btn-stop { background: var(--primary-color); color: white; padding: 8px 14px; border-radius: 20px; flex-shrink: 0; }
         .btn-del { background: transparent; color: #ff4444; font-size: 20px; padding: 0 5px; }
         #player-wrapper { width: 100%; border-radius: 12px; background: #000; min-height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #333; }
         audio { width: 90%; }
@@ -191,7 +192,7 @@
                             <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
                             <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
                             <button class="btn-play" onclick='reproducir(${JSON.stringify(item)})'>▶</button>
-                            <button class="btn-del" style="color: #ffcc00; font-size: 16px;" onclick="detenerReproduccion()">⏹️</button>
+                            <button class="btn-del btn-stop" style="color: #ffcc00; font-size: 16px;" onclick="detenerReproduccion()">⏹️</button>
                             <button class="btn-del" onclick="eliminar(${i})">✖</button>
                         </div>
                     </div>`;
