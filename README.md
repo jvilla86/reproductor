@@ -5,7 +5,7 @@ Una aplicación web ligera y privada para gestionar listas de reproducción híb
 ## 🚀 Características
 
 - **Soporte Multi-Plataforma:** Reproduce enlaces de YouTube, Spotify y SoundCloud.
-- **Integración con la Nube:** Soporte optimizado para streaming directo desde **Google Drive** y **Dropbox**.
+- **Integración con la Nube:** Soporte optimizado para streaming directo desde **Dropbox**.
 - **Almacenamiento Local:** Permite cargar archivos MP3/WAV directamente en el navegador usando `IndexedDB` (los archivos permanecen guardados incluso al cerrar la pestaña).
 - **Privacidad Total:** La aplicación no tiene servidor; todos tus datos y archivos se guardan localmente en tu dispositivo.
 - **Portabilidad:** Sistema de Importación/Exportación mediante archivos JSON para mover tus listas entre dispositivos.
@@ -18,7 +18,7 @@ Una aplicación web ligera y privada para gestionar listas de reproducción híb
 - **Archivos Locales:** Usa el botón 📁 para seleccionar un archivo de tu dispositivo. Se guardará de forma permanente en la base de datos del navegador.
 
 ### 2. Configuración de la Nube
-Para que los archivos de **Google Drive** o **Dropbox** funcionen:
+Para que los archivos de **Dropbox** funcionen:
 1. Sube el archivo a tu cuenta.
 2. Configura el archivo como **"Público"** o **"Cualquier persona con el enlace"**.
 3. Copia el enlace y pégalo en la aplicación.
