@@ -134,6 +134,15 @@
             }
         }
 
+        function detenerReproduccion() {
+            const wrapper = document.getElementById('player-wrapper');
+            wrapper.innerHTML = `
+                <div style="text-align: center; color: #888; padding: 20px;">
+                    <p>Reproducción detenida</p>
+                    <small>Selecciona otra canción para continuar</small>
+                </div>`;
+        }
+
         function eliminar(index) {
             if (confirm("¿Eliminar?")) {
                 if (playlist[index].type === 'local') {
@@ -182,6 +191,7 @@
                             <button class="btn-order" onclick="mover(${i}, -1)" ${i===0?'disabled':''}>▲</button>
                             <button class="btn-order" onclick="mover(${i}, 1)" ${i===playlist.length-1?'disabled':''}>▼</button>
                             <button class="btn-play" onclick='reproducir(${JSON.stringify(item)})'>▶</button>
+                            <button class="btn-del" style="color: #ffcc00; font-size: 16px;" onclick="detenerReproduccion()">⏹️</button>
                             <button class="btn-del" onclick="eliminar(${i})">✖</button>
                         </div>
                     </div>`;
