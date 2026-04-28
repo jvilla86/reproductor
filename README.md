@@ -27,6 +27,7 @@ Para que los archivos de **Dropbox** funcionen:
 - Usa el botón **Exportar JSON** periódicamente.
 - Este archivo contiene los nombres y enlaces de tu lista. 
 - *Nota: El JSON no contiene los archivos físicos cargados mediante el botón local, solo sus referencias.*
+- *Nota: Para transferir el JSON no usar aplicaciones con cifrado como Whatsapp o Proton. Alteran el archivo y no funciona. Se recomienda otras como Google Drive o Dropbox.*
 
 ## 📂 Estructura del Proyecto
 
